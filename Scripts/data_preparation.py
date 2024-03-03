@@ -1,5 +1,7 @@
 import sqlite3
 import pandas as pd
+import os
+
 
 def connect_to_database(file_path):
     try:
@@ -10,6 +12,7 @@ def connect_to_database(file_path):
         print("Error connecting to SQLite database:", e)
         return None
 
+
 def read_data(conn):
     try:
         match_df = pd.read_sql_query("SELECT * FROM Match", conn)
@@ -18,9 +21,11 @@ def read_data(conn):
         print("Error reading data from database:", e)
         return None
 
+
 def check_duplicates(df):
     is_dup = (~df.duplicated()).all()
     print(is_dup)
+
 
 def calculate_missing_values(df):
     percent_missing = df.isnull().sum() * 100 / len(df)
@@ -28,8 +33,14 @@ def calculate_missing_values(df):
     missing_value_df.sort_values('percent_missing', inplace=True, ascending=False)
     print(missing_value_df)
 
+
 def main():
-    file_path = '/Users/rango/Documents/projects/SoccerForecast/database.sqlite'
+    # Get the current working directory (where your Python script is located)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # Get the parent directory (one level up)
+    parent_dir = os.path.dirname(current_dir)
+    # Construct the full path to database.sqlite
+    file_path = os.path.join(parent_dir, 'database.sqlite')
     conn = connect_to_database(file_path)
     if conn is not None:
         match_df = read_data(conn)
@@ -37,6 +48,7 @@ def main():
             check_duplicates(match_df)
             calculate_missing_values(match_df)
             conn.close()
+
 
 if __name__ == "__main__":
     main()
