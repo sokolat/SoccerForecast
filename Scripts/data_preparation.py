@@ -16,8 +16,9 @@ def connect_to_database(file_path):
 def read_data(conn):
     try:
         match_df = pd.read_sql_query("SELECT * FROM Match", conn)
+        team_attrb_df = pd.read_sql_query("SELECT * FROM Team_attributes", conn)
 
-        return match_df
+        return match_df, team_attrb_df
     except sqlite3.Error as e:
         print("Error reading data from database:", e)
         return None
@@ -31,13 +32,13 @@ def main():
     file_path = os.path.join(parent_dir, 'database.sqlite')
     conn = connect_to_database(file_path)
     if conn is not None:
-        match_df = read_data(conn)
-        if match_df is not None:
-            if (~match_df.duplicated()).all() :
-                match_df.drop_duplicates()
-                # keeping all columns with at least 90% of non null values
-                match_df = match_df.dropna(thresh=0.9 * len(match_df), axis=1)
-                print(match_df)
+        match_df, team_attrb_df = read_data(conn)
+        if all(df is not None for df in [match_df, team_attrb_df]):
+            match_df.drop_duplicates()
+            # keep all columns with at least 90% of non null values
+            match_df.dropna(thresh=0.9 * len(match_df), axis=1,inplace=True)
+            #replace missing data with mean
+            match_df.fillna(match_df.mean(numeric_only=True).round(1),inplace=True)
             conn.close()
 
 
