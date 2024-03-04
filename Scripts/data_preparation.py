@@ -39,6 +39,20 @@ def main():
             match_df.dropna(thresh=0.9 * len(match_df), axis=1,inplace=True)
             #replace missing data with mean
             match_df.fillna(match_df.mean(numeric_only=True).round(1),inplace=True)
+            # column 'buildUpPlayDribbling' has 66% percent of missing data
+            team_attrb_df.drop('buildUpPlayDribbling',axis=1,inplace=True)
+            # Merge on home_team_api_id
+            df_attrb_home_df = team_attrb_df.add_prefix('home_')
+            merged_home = pd.merge(df_attrb_home_df,match_df, on='home_team_api_id')
+            # Merge on away_team_api_id
+            df_attrb_away_df = team_attrb_df.add_prefix('away_')
+            merged_df = pd.merge(df_attrb_away_df,merged_home, on='away_team_api_id')
+            #drop id columns
+            merged_df.drop(list(merged_df.filter(regex='id')), axis=1, inplace=True)
+            #away_date and home_date contain same data
+            merged_df.rename(columns={'home_date':'date'},inplace=True)
+            merged_df.drop('away_date',axis=1,inplace=True)
+            print(merged_df.columns.tolist())
             conn.close()
 
 
