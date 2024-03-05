@@ -1,7 +1,6 @@
 import sqlite3
 import pandas as pd
 import argparse
-from sklearn import preprocessing
 
 def connect_to_database(file_path):
     """
