@@ -1,7 +1,7 @@
 import sqlite3
 import pandas as pd
 import argparse
-from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 
 
 def connect_to_database(file_path):
@@ -80,6 +80,12 @@ def clean_data(match_df, team_attrb_df, do_normalize=False):
             1 if x['home_team_goal'] > x['away_team_goal'] else 2), axis=1)
         merged_df.drop(list(merged_df.filter(regex='goal')), axis=1, inplace=True)
 
+        # encode all categorical data
+        le = preprocessing.LabelEncoder()
+        colums_to_encode = list(merged_df.filter(regex='.*Class$'))
+        print(colums_to_encode)
+        for col in colums_to_encode:
+            merged_df[col] = le.fit_transform(merged_df[col])
         return merged_df
     else:
         return None
@@ -103,13 +109,10 @@ def main():
         merged_df = clean_data(match_df, team_attrb_df, do_normalize=args.do_normalize)
         if merged_df is not None:
             # Split the data into train and test sets and save them as CSV files
-            train, test = train_test_split(merged_df, test_size=0.2)
             merged_df.head(10).to_csv('sample.csv')
-            train.to_csv('cleaned_data_train.csv', index=False)
-            test.to_csv('cleaned_data_test.csv', index=False)
+            merged_df.to_csv('cleaned_data.csv', index=False)
         conn.close()
 
 
 if __name__ == "__main__":
     main()
-
