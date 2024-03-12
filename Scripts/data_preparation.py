@@ -58,6 +58,7 @@ def clean_data(match_df, team_attrb_df, do_normalize=False):
     if all(df is not None for df in [match_df, team_attrb_df]):
         # Drop unnecessary columns
         match_df.drop(columns=['season', 'date'], axis=1, inplace=True)
+        match_df.drop(list(match_df.filter(regex='player')), axis=1, inplace=True)
         match_df.dropna(thresh=0.9 * len(match_df), axis=1, inplace=True)
         match_df.fillna(match_df.mean(numeric_only=True).round(1), inplace=True)
 
@@ -83,7 +84,6 @@ def clean_data(match_df, team_attrb_df, do_normalize=False):
         # encode all categorical data
         le = preprocessing.LabelEncoder()
         colums_to_encode = list(merged_df.filter(regex='.*Class$'))
-        print(colums_to_encode)
         for col in colums_to_encode:
             merged_df[col] = le.fit_transform(merged_df[col])
         return merged_df

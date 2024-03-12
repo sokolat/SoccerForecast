@@ -26,7 +26,7 @@ def main():
     y_pred = rf_classifier.predict(x_test)
     # Evaluate the model
     accuracy = accuracy_score(y_test, y_pred)
-    print("Accuracy:", accuracy)
+    print("Accuracy test:", accuracy)
 
 
 if __name__ == "__main__":
